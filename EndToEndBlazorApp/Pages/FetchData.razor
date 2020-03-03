@@ -49,8 +49,8 @@
                                             <td>@forecasts.Summary</td>
 
                                             <td>
-                                                <button class="btn btn-info" title="Edit"><i class="oi oi-pencil"></i></button>
-                                                <button class="btn btn-danger" title="Delete"><i class="oi oi-trash"></i></button>
+                                                <button class="btn btn-info" title="Edit" @onclick="(() => EditForecast(forecasts))"><i class="oi oi-pencil"></i></button>
+                                                <button class="btn btn-danger" title="Delete" ><i class="oi oi-trash"></i></button>
                                             </td>
                                         </tr>
                                     }
@@ -139,6 +139,13 @@
         ShowPopup = true;
     }
 
+    void EditForecast(WeatherForecast model)
+    {
+        //Set the seleted forecast as the current forecast:
+        weatherForecast = model;
+        ShowPopup = true;
+    }
+
     async Task SaveForecast()
     {
         //Close the poput
@@ -163,6 +170,7 @@
         else
         {
             //this is an update
+            var result = await Service.UpdateForecastAsync(weatherForecast);
         }
 
         forecasts = await Service.GetForecastAsync(user.Identity.Name);

@@ -27,5 +27,24 @@ namespace EndToEndBlazorApp.Data
              _context.SaveChanges();
             return   Task.FromResult(weatherForecast);
         }
+
+        public Task<bool> UpdateForecastAsync(WeatherForecast weatherForecast)
+        {
+            var existingWeatherForecast = _context.WeatherForecast.FirstOrDefault(x => x.Id == weatherForecast.Id);
+            if (existingWeatherForecast !=null)
+            {
+                existingWeatherForecast.Date = weatherForecast.Date;
+                existingWeatherForecast.Summary = weatherForecast.Summary;
+                existingWeatherForecast.TemperatureC = weatherForecast.TemperatureC;
+                existingWeatherForecast.TemperatureF = weatherForecast.TemperatureF;
+                _context.SaveChanges();
+            }
+            else
+            {
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(true);
+        }
     }
 }

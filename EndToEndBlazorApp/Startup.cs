@@ -25,9 +25,7 @@ namespace EndToEndBlazorApp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<EndtoEndContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+
 
             services.AddDbContext<ApplicationDbContext>(options =>
                   options.UseSqlServer(
@@ -35,6 +33,9 @@ namespace EndToEndBlazorApp
             services.AddDefaultIdentity<IdentityUser>(
                 options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddDbContext<EndtoEndContext>(options =>
+                options.UseSqlServer( Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddRazorPages();
             services.AddServerSideBlazor();

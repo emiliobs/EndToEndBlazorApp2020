@@ -20,5 +20,12 @@ namespace EndToEndBlazorApp.Data
             //Get water forescats:
             return await _context.WeatherForecast.Where(wf => wf.UserName == currentuser).AsNoTracking().ToListAsync();
         }
+
+        public  Task<WeatherForecast> CreateForecastAsync(WeatherForecast weatherForecast)
+        {
+             _context.WeatherForecast.Add(weatherForecast);
+             _context.SaveChanges();
+            return   Task.FromResult(weatherForecast);
+        }
     }
 }

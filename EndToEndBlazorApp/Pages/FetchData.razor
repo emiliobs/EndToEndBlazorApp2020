@@ -2,9 +2,6 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inherits OwningComponentBase<WeatherForecastService>
 @inject IJSRuntime js
-
-
-
 @*<h1>Weather forecast</h1>*@
 <!--AuthorizwViww allows us to only show section of thr page based on the security on the current user-->
 <AuthorizeView>
@@ -19,6 +16,8 @@
         }
         else
         {
+
+
             <div class="row">
                 <div class="col-xl-12">
                     <div class="card">
@@ -27,9 +26,9 @@
                             <em style="float:right; font:bold;">Hello, @context.User.Identity.Name!</em>
                         </div>
                         <div class="card-body">
-                            <button class="btn btn-primary"><i class="oi oi-plus"></i> Create New</button>
+                            <button class="btn btn-primary" @onclick="AddNewForecast"><i class="oi oi-plus"></i> Create New</button>
                             <br /><br />
-                            <table id="Table" class="table table-hover  table-striped">
+                            <table class="table table-hover  table-striped">
 
                                 <thead>
                                     <tr>
@@ -61,9 +60,39 @@
                     </div>
                 </div>
             </div>
-            
+
+            @if (ShowPopup)
+            {
+                <!-- This is the popup to create or edit a forecast -->
+                <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title">Edit Forecast</h3>
+                                <!-- Button to close the popup -->
+                                <button type="button" class="close" @onclick="ClosePopup">
+                                    <span aria-hidden="true">X</span>
+
+                                </button>
+                            </div>
+                            <!-- Edit form for the current forecast -->
+                            <div class="modal-body">
+                                <input class="form-control" type="text" placeholder="Celsius Forecast." @bind="weatherForecast.TemperatureC" />
+                                <br />
+                                <input class="form-control" type="text" placeholder="Celsius Fahrenheit Forecast." @bind="weatherForecast.TemperatureF" />
+                                <br />
+                                <input class="form-control" type="text" placeholder="Summary." @bind="weatherForecast.Summary" />
+                                <br />
+                                <button class="btn btn-success" @onclick="@SaveForecast">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         }
     </Authorized>
+
+
     <!-- show this section if the user is not logged in-->
     <NotAuthorized>
         <p><em>You'r not signed in.</em></p>
@@ -79,6 +108,10 @@
     private Task<AuthenticationState> AuthenticationStateTask { get; set; }
     List<WeatherForecast> forecasts;
 
+    WeatherForecast weatherForecast = new WeatherForecast();
+    bool ShowPopup = false;
+
+
     protected override async Task OnInitializedAsync()
     {
         //Get the user current user:
@@ -90,4 +123,49 @@
         // await js.InvokeAsync<object>("UsedTable","#Table");
 
     }
+
+    void ClosePopup()
+    {
+        ShowPopup = false;
+    }
+
+    void AddNewForecast()
+    {
+        //Make new forecast:
+        weatherForecast = new WeatherForecast();
+        //Set Id to 0 so we it is a new record:
+        weatherForecast.Id = 0;
+        //open the Popup
+        ShowPopup = true;
+    }
+
+    async Task SaveForecast()
+    {
+        //Close the poput
+        ShowPopup = false;
+        //Get the current user:
+        var user = (await AuthenticationStateTask).User;
+        //A new forecast will  have the Id set to 0
+        if (weatherForecast.Id == 0)
+        {
+            //Create a new forecast:
+            WeatherForecast newWeatherForecast = new WeatherForecast();
+
+            newWeatherForecast.Date = DateTime.Now;
+            newWeatherForecast.Summary = weatherForecast.Summary;
+            newWeatherForecast.TemperatureC = Convert.ToInt32(weatherForecast.TemperatureC);
+            newWeatherForecast.TemperatureF = Convert.ToInt32(weatherForecast.TemperatureF);
+            newWeatherForecast.UserName = user.Identity.Name;
+            //Save the result:
+            var result = @Service.CreateForecastAsync(newWeatherForecast);
+
+        }
+        else
+        {
+            //this is an update
+        }
+
+        forecasts = await Service.GetForecastAsync(user.Identity.Name);
+    }
+
 }

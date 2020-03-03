@@ -46,5 +46,21 @@ namespace EndToEndBlazorApp.Data
 
             return Task.FromResult(true);
         }
+
+        public Task<bool> DeleteForecastAsync(WeatherForecast weatherForecast)
+        {
+            var existingWeatherForecast =  _context.WeatherForecast.FirstOrDefault(x => x.Id == weatherForecast.Id);
+            if (existingWeatherForecast != null)
+            {
+                _context.WeatherForecast.Remove(existingWeatherForecast);
+                _context.SaveChanges();
+            }
+            else
+            {
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(true);
+        }
     }
 }

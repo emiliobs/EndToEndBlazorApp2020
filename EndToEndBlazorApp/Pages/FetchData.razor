@@ -50,7 +50,7 @@
 
                                             <td>
                                                 <button class="btn btn-info" title="Edit" @onclick="(() => EditForecast(forecasts))"><i class="oi oi-pencil"></i></button>
-                                                <button class="btn btn-danger" title="Delete" ><i class="oi oi-trash"></i></button>
+                                                @*<button class="btn btn-danger" title="Delete" ><i class="oi oi-trash"></i></button>*@
                                             </td>
                                         </tr>
                                     }
@@ -83,7 +83,12 @@
                                 <br />
                                 <input class="form-control" type="text" placeholder="Summary." @bind="weatherForecast.Summary" />
                                 <br />
-                                <button class="btn btn-success" @onclick="@SaveForecast">Save</button>
+                                <button class="btn btn-success" @onclick="@SaveForecast" title="Save"><i class="oi oi-file"></i></button>
+                                @if (weatherForecast.Id > 0)
+                                {
+                                    <!-- Button to delete the forecast -->
+                                    <button class="btn btn-danger" title="Delete" @onclick="DeleteForecast"> <i class="oi oi-trash"></i></button>
+                                }
                             </div>
                         </div>
                     </div>
@@ -144,6 +149,14 @@
         //Set the seleted forecast as the current forecast:
         weatherForecast = model;
         ShowPopup = true;
+    }
+
+    async Task DeleteForecast()
+    {
+        ShowPopup = false;
+        var user = (await AuthenticationStateTask).User;
+        var result = @Service.DeleteForecastAsync(weatherForecast);
+        forecasts = await Service.GetForecastAsync(user.Identity.Name);
     }
 
     async Task SaveForecast()
